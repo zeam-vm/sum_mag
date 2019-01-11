@@ -4,6 +4,58 @@ defmodule SumMag do
   """
 
   @doc """
+      ## Examples
+      iex> quote do end |> SumMag.parse(%{target: :hastega})
+      []
+
+      iex> (quote do: def func(a), do: a) |> SumMag.parse(%{target: :hastega})
+      [[function_name: :func, is_public: true, args: [:a], do: [{:a, [], SumMagTest}], is_nif: false ]]
+
+      iex> (quote do
+      ...>   def func(a), do: funcp(a)
+      ...>   defp funcp(a), do: a
+      ...> end) |> SumMag.parse(%{target: :hastega})
+      [[function_name: :func, is_public: true, args: [:a], do: [{:funcp, [], [{:a, [], SumMagTest}]}], is_nif: false ], [function_name: :funcp, is_public: false, args: [:a], do: [{:a, [], SumMagTest}], is_nif: false ]]
+
+      iex> (quote do
+      ...>    def func(list) do
+      ...>      list
+      ...>      |> Enum.map(& &1)
+      ...>    end
+      ...> end) |> SumMag.parse(%{target: :hastega})
+      [[function_name: :func, is_public: true, args: [:list], do: [{:|>, [context: SumMagTest, import: Kernel], [{:list, [], SumMagTest}, {{:., [], [{:__aliases__, [alias: false], [:Enum]}, :map]}, [], [{:&, [], [{:&, [], [1]}]}]}]}], is_nif: false ]]
+  """
+  def parse({:__block__, _e, []}, _env), do: []
+
+  def parse({:def, _e, body}, env) do
+    [[
+      function_name: parse_function_name(body, env),
+      is_public: true,
+      args: parse_args(body, env),
+      do: parse_do(body, env),
+      is_nif: false
+    ]]
+  end
+
+  def parse({:defp, _e, body}, env) do
+    [[
+      function_name: parse_function_name(body, env),
+      is_public: false,
+      args: parse_args(body, env),
+      do: parse_do(body, env),
+      is_nif: false
+    ]]
+  end
+
+  def parse({:__block__, _e, body_list}, env) do
+    body_list
+    |> Enum.map(& &1
+      |> parse(env)
+      |> hd() )
+    |> Enum.reject(& &1 == :ignore_parse)
+  end
+
+  @doc """
     ## Examples
 
     iex> [{:null, [context: Elixir], []}, [do: {:nil, [], Elixir}]] |> SumMag.parse_function_name(%{})
