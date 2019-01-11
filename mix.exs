@@ -7,6 +7,8 @@ defmodule SumMag.MixProject do
       version: "0.0.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
       deps: deps()
     ]
   end
@@ -24,4 +26,17 @@ defmodule SumMag.MixProject do
       { :ex_doc,      ">= 0.0.0", only: :dev}
     ]
   end
+  defp description() do
+    "SumMag"
+  end
+
+  defp package() do
+    [
+      name: "sum_mag",
+      maintainers: ["Susumu Yamazaki", "Masakazu Mori", "Yoshihiro Ueno", "Hideki Takase"],
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/zeam-vm/sum_mag"}
+    ]
+  end
+
 end
