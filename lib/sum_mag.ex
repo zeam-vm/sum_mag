@@ -53,6 +53,39 @@ defmodule SumMag do
   @doc """
     ## Examples
 
+    iex> [{:null, [context: Elixir], []}, [do: {:nil, [], Elixir}]] |> SumMag.parse_do
+    [{:nil, [], Elixir}]
+
+    iex> [{:func, [context: Elixir], [{:a, [], Elixir}]}, [do: {:a, [], Elixir}]] |> SumMag.parse_do
+    [{:a, [], Elixir}]
+
+    iex> [{:add, [context: Elixir], [{:a, [], Elixir}, {:b, [], Elixir}]},[do: {:+, [context: Elixir, import: Kernel], [{:a, [], Elixir}, {:b, [], Elixir}]}]] |> SumMag.parse_do
+    [{:+, [context: Elixir, import: Kernel], [{:a, [], Elixir}, {:b, [], Elixir}]}]
+  """
+  def parse_do(body) do
+    body
+    |> tl
+    |> hd
+    |> hd
+    |> parse_do_block()
+  end
+
+  defp parse_do_block({:do, do_body}), do: parse_do_body(do_body)
+
+  defp parse_do_body({:__block__, _env, []}), do: []
+
+  defp parse_do_body({:__block__, _env, body_list}) do
+    body_list
+    |> Enum.map(& &1
+      |> parse_do_body()
+      |> hd() )
+  end
+
+  defp parse_do_body(value), do: [value]
+
+  @doc """
+    ## Examples
+
     iex> :func |> SumMag.concat_name_nif
     :func_nif
   """
