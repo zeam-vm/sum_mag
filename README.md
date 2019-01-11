@@ -1,6 +1,6 @@
 # SumMag
 
-**TODO: Add description**
+SumMag: a meta-programming library for Hastega and Cockatorice.
 
 ## Installation
 

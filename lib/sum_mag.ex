@@ -1,5 +1,5 @@
 defmodule SumMag do
   @moduledoc """
-  Documentation for SumMag.
+  SumMag: a meta-programming library for Hastega and Cockatorice.
   """
 end
