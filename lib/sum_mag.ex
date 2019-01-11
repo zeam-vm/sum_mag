@@ -14,8 +14,6 @@ defmodule SumMag do
 
     iex> [{:add, [context: Elixir], [{:a, [], Elixir}, {:b, [], Elixir}]},[do: {:+, [context: Elixir, import: Kernel], [{:a, [], Elixir}, {:b, [], Elixir}]}]] |> SumMag.parse_function_name
     :add
-
-
   """
   def parse_function_name(body), do: body |> hd |> elem(0)
 
@@ -30,8 +28,6 @@ defmodule SumMag do
 
     iex> [{:add, [context: Elixir], [{:a, [], Elixir}, {:b, [], Elixir}]},[do: {:+, [context: Elixir, import: Kernel], [{:a, [], Elixir}, {:b, [], Elixir}]}]] |> SumMag.parse_args
     [:a, :b]
-
-
   """
   def parse_args(body) do
     body
@@ -53,5 +49,15 @@ defmodule SumMag do
     [:a, :b]
   """
   def convert_args(arg_list), do: arg_list |> Enum.map(& elem(&1, 0))
+
+  @doc """
+    ## Examples
+
+    iex> :func |> SumMag.concat_name_nif
+    :func_nif
+  """
+  def concat_name_nif(name) do
+    name |> Atom.to_string |> Kernel.<>("_nif") |> String.to_atom
+  end
 
 end
