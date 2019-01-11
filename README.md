@@ -4,13 +4,12 @@ SumMag: a meta-programming library for Hastega and Cockatorice.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `sum_mag` to your list of dependencies in `mix.exs`:
+This package can be installed by adding `sum_mag` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:sum_mag, "~> 0.1.0"}
+    {:sum_mag, "~> 0.0.3"}
   ]
 end
 ```
