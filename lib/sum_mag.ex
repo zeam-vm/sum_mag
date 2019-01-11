@@ -12,12 +12,6 @@ defmodule SumMag do
       [[function_name: :func, is_public: true, args: [:a], do: [{:a, [], SumMagTest}], is_nif: false ]]
 
       iex> (quote do
-      ...>   def func(a), do: funcp(a)
-      ...>   defp funcp(a), do: a
-      ...> end) |> SumMag.parse(%{target: :hastega})
-      [[function_name: :func, is_public: true, args: [:a], do: [{:funcp, [], [{:a, [], SumMagTest}]}], is_nif: false ], [function_name: :funcp, is_public: false, args: [:a], do: [{:a, [], SumMagTest}], is_nif: false ]]
-
-      iex> (quote do
       ...>    def func(list) do
       ...>      list
       ...>      |> Enum.map(& &1)
@@ -45,14 +39,6 @@ defmodule SumMag do
       do: parse_do(body, env),
       is_nif: false
     ]]
-  end
-
-  def parse({:__block__, _e, body_list}, env) do
-    body_list
-    |> Enum.map(& &1
-      |> parse(env)
-      |> hd() )
-    |> Enum.reject(& &1 == :ignore_parse)
   end
 
   @doc """
