@@ -93,4 +93,14 @@ defmodule SumMag do
     name |> Atom.to_string |> Kernel.<>("_nif") |> String.to_atom
   end
 
+  @doc """
+    ## Examples
+
+    iex> :hastega |> SumMag.concat_name_stub(%{})
+    :hastegastub
+  """
+  def concat_name_stub(name, _env) do
+    name |> Atom.to_string |> Kernel.<>("stub") |> String.to_atom
+  end
+
 end
