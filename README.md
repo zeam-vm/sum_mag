@@ -9,7 +9,7 @@ This package can be installed by adding `sum_mag` to your list of dependencies i
 ```elixir
 def deps do
   [
-    {:sum_mag, "~> 0.0.5"}
+    {:sum_mag, "~> 0.0.6"}
   ]
 end
 ```
