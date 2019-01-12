@@ -124,6 +124,32 @@ defmodule SumMag do
   @doc """
     ## Examples
 
+    iex> SumMag.increment_nif(%{num: 0})
+    1
+
+    iex> SumMag.increment_nif(%{num: 1})
+    2
+  """
+  def increment_nif(%{num: num}) do
+    num + 1
+  end
+
+  @doc """
+    ## Examples
+
+    iex> :func |> SumMag.concat_name_num(%{num: 1})
+    :func_1
+
+    iex> :fl |> SumMag.concat_name_num(%{num: 2})
+    :fl_2
+  """
+  def concat_name_num(name, %{num: num}) do
+    name |> Atom.to_string |> Kernel.<>("_#{num}") |> String.to_atom
+  end
+
+  @doc """
+    ## Examples
+
     iex> :func |> SumMag.concat_name_nif(%{})
     :func_nif
   """
