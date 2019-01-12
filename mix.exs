@@ -4,7 +4,7 @@ defmodule SumMag.MixProject do
   def project do
     [
       app: :sum_mag,
-      version: "0.0.7",
+      version: "0.0.8",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       description: description(),
