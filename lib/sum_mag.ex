@@ -167,4 +167,32 @@ defmodule SumMag do
     name |> Atom.to_string |> Kernel.<>("stub") |> String.to_atom
   end
 
+  @doc """
+    ## Examples
+
+    iex> SumMag.func_with_num([function_name: :func], %{num: 1})
+    [function_name: :func_1]
+  """
+  def func_with_num(kl, env) do
+    Keyword.put(kl, :function_name, (kl[:function_name] |> SumMag.concat_name_num(env)))
+  end
+
+  @doc """
+    ## Examples
+
+    iex> SumMag.get_func_info(%{nif: [function_name: :func]})
+    [function_name: :func]
+  """
+  def get_func_info(%{nif: func_info}), do: func_info
+
+  @doc """
+    ## Examples
+
+    iex> SumMag.merge_func_info(%{nif: [function_name: :func]}, [is_public: true])
+    %{nif: [function_name: :func, is_public: true]}
+  """
+  def merge_func_info(env, keyword) do
+    Map.put(env, :nif, Keyword.merge(get_func_info(env), keyword))
+  end
+
 end
