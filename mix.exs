@@ -24,7 +24,8 @@ defmodule SumMag.MixProject do
   defp deps do
     [
       { :ex_doc,      ">= 0.0.0", only: :dev},
-      { :earmark, "~>1.3", only: :dev}
+      { :earmark, "~>1.3", only: :dev},
+      { :benchfella, "~>0.3.0", only: :dev},
     ]
   end
   defp description() do
