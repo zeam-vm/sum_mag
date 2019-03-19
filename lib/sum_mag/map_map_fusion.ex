@@ -26,12 +26,12 @@ defmodule SumMag.MMF do
   """
   defmacro defmmf clause do
     clause
-    |> Opt.inspect
+    |> Opt.inspect(label: "before")
     |> get_func
     |> Enum.map(& &1 |> to_keyword |> map_map_fusion ) 
     |> Enum.map(& &1 |> to_ast)
     |> decompose
-    |> Opt.inspect
+    |> Opt.inspect(label: "after")
   end
 
   @doc """
@@ -46,8 +46,8 @@ defmodule SumMag.MMF do
   @doc """
   関数の実装部を取り出します\n
   Take a main process of function\n
-  sectionは次のような形です.\n
-  section is following type  
+  posは次のような形です.\n
+  pos is following type  
   - [line: 10]  
   - [context: Elixir, import: Kernel]
 
@@ -87,9 +87,9 @@ defmodule SumMag.MMF do
 
   @doc """
   定義箇所( [line: ] )の取り出し\n
-  Get section of definition\n
+  Get pos of definition\n
   """
-  def get_section([{_func_name, section, _body}]), do: section
+  def get_pos([{_func_name, pos, _body}]), do: pos
 
   @doc """
   
@@ -113,142 +113,82 @@ defmodule SumMag.MMF do
   # find nests of pipe line operator by recursive.\n
   # If ast have more than 2 nest layer, try optimizing expressions with Map/Map Fusion\n
   defp analysis(
-      {:|>, meta_data1,
+      {:|>, meta1,
         [
-          {:|>, meta_data2, body},
-          right
+          {:|>, meta2, early}, late
         ]
       }) do 
 
-      left = {:|>, meta_data1, body}
-      enum_map_with_arg = left |> analysis 
+      inner_branch = early |> enum_map_to_key |> Opt.inspect(label: "inner")
+      branch2      = late  |> enum_map_to_key |> Opt.inspect(label: "outer")
 
-      func = right |> get_func_from_enum_map
+      fused_proc = fusion_func( inner_branch[:func], branch2[:func])
 
-      fused_proc = fusion_expr(
-        enum_map_with_arg |> get_func_from_enum_map, 
-        func)
-
-      section = enum_map_with_arg 
-      |> get_func_from_enum_map 
-      |> get_section
-
-      arg = enum_map_with_arg |> get_arg
-      enum_map_pos = enum_map_with_arg |> get_enum_map_pos
-      fused_proc = [{:&, section, fused_proc}]
-
-      {:|>, meta_data2, 
-      [ 
-        arg, 
-        enum_map_pos |> Tuple.append(fused_proc)
+      {:|>, [meta1, meta2], [
+        inner_branch[:collection],
+        inner_branch[:enum_map] |> Tuple.append(fused_proc)
       ]}
   end 
 
-  defp analysis(
-    {:|>, _meta_data1,
-      [ 
-        { atom, meta_data2, nil}, right]
-    }) do
-    [{atom, meta_data2, nil} , right ]
-  end
-
   defp analysis(expr), do: expr
 
-  defp fusion_expr(
+  # defp analysis({:|>, _, literal}, acc) do
+  #   case literal do
+  #     [ {:|>, _, _}, _child ] -> 
+  #       literal |> IO.inspect(label: "literal")
+  #       # buf = child |> 
+  #      _  -> 
+  #       literal |> IO.inspect(label: "literal")
+  #   end
+  # end  
+
+  defp fusion_func(
     [{atom1, meta1, 
       [
         {:&, arg_meta1, [1]},  
-        expr_or_value1
+        expr1
       ]
     }], 
     [{atom2, meta2, 
       [
         {:&, arg_meta2, [1]},  
-        expr_or_value2
+        expr2
       ]
     }]) do
 
-    [{atom2, meta2,
+    fused_proc = [{atom2, meta2,
       [
         {atom1, meta1,[
           {:&, [arg_meta1, arg_meta2], [1]},  
-          expr_or_value1
+          expr1
         ]},
-        expr_or_value2
+        expr2
       ]
     }]
-  end
 
-  @doc """
-  
-  
-  """
-  def get_enum_map_pos(
-    [ 
-      _,
-      { {:., dot_pos1, [{:__aliases__, dot_pos2, [:Enum]}, :map]}, pos1, _ }
-    ])
-    do
-      { {:., dot_pos1, [{:__aliases__, dot_pos2, [:Enum]}, :map]}, pos1}
+    [{:&, [meta1, meta2], fused_proc}]
   end
-
-  @doc """
   
-  
-  """
-  def get_enum_map_pos(
-    { {:., dot_pos1, [{:__aliases__, dot_pos2, [:Enum]}, :map]}, pos, 
-          [ 
-            {:&, _pos, _func}
-          ]
-    })
-    do
-      {{:., dot_pos1, [{:__aliases__, dot_pos2, [:Enum]}, :map]}, pos}
-  end
-
-  @doc """
-  
-  
-  """
-  def get_arg(
-    [{arg, meta, nil},
-    {{:., dot_pos, [{:__aliases__, dot_pos, [:Enum]}, :map]}, pos, 
-      [{:&, pos, _func}]
+  def enum_map_to_key(
+    [collection, {{:., meta, [ {:__aliases__, map_meta, [:Enum] }, :map]}, enum_meta, 
+      [{:&, func_meta, function}]
     }]) do
-    {arg, meta, nil}
-  end
-  
-  @doc """
-  
-  collection
-  |> Enum.map(bar) <- here
-  |> Enum.map(hoge)
-  |> Enum.map(foo) 
-
-  """
-  def get_func_from_enum_map(
-    [_collections, {{:., _, [ {:__aliases__, _, [:Enum] }, :map]}, _, 
-      [{:&, _, function}]
-    }]) do
-    function 
-    # |> Opt.inspect(label: "先頭")
+    [
+      {:collection,collection},
+      {:enum_map,  {{:., meta, [ {:__aliases__, map_meta, [:Enum] }, :map]}, enum_meta}},
+      {:func_meta, func_meta},
+      {:func,      function}
+    ]
   end  
 
-  @doc """
-  
-  collection
-  |> Enum.map(bar)
-  |> Enum.map(hoge)
-  |> Enum.map(foo) <- here
-
-  """
-  def get_func_from_enum_map(
-    { {:., _, [{:__aliases__, _, [:Enum]}, :map]}, _, 
-          [ 
-            {:&, _, function}
-          ]
+  def enum_map_to_key(
+   {{:., meta, [ {:__aliases__, map_meta, [:Enum] }, :map]}, enum_meta, 
+      [{:&, func_meta, function}]
     }) do
-    function 
-    # |> Opt.inspect(label: "末尾")
-  end
+    [
+      {:enum_map,  {{:., meta, [ {:__aliases__, map_meta, [:Enum] }, :map]}, enum_meta}},
+      {:func_meta, func_meta},
+      {:func,      function}
+    ]
+  end  
 end
