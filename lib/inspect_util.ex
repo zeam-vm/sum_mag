@@ -1,4 +1,4 @@
-defmodule SumMag.MMF.Opt do
+defmodule SumMag.Opt do
   @syntax_colors [atom: :cyan, number: :yellow]
 
   def inspect(term) do

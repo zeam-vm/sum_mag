@@ -1,6 +1,6 @@
 defmodule SumMag.MMF do
   alias Locale.En, as: Locale
-  alias SumMag.MMF.Opt 
+  alias SumMag.Opt 
 
   @func_ast Locale.func_ast
   @func_name Locale.func_name
