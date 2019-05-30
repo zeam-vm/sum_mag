@@ -27,7 +27,7 @@ defmodule SumMag.MMF do
   defmacro defmmf clause do
     clause
     |> Opt.inspect(label: "before")
-    |> get_func
+    |> get_do_tree
     |> Enum.map(& &1 |> to_keyword |> map_map_fusion ) 
     |> Enum.map(& &1 |> to_ast)
     |> decompose
@@ -39,9 +39,9 @@ defmodule SumMag.MMF do
     
   """
 
-  def get_func([ do: { :__block__, [], []    } ]), do: []
-  def get_func([ do: { :__block__, [], funcs } ]), do: funcs
-  def get_func([ do: func]), do: [func] 
+  def get_do_tree([ do: { :__block__, [], []    } ]), do: []
+  def get_do_tree([ do: { :__block__, [], funcs } ]), do: funcs
+  def get_do_tree([ do: func]), do: [func] 
 
   @doc """
   関数の実装部を取り出します\n

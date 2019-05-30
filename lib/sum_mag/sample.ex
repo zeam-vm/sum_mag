@@ -3,7 +3,7 @@ defmodule SumMag.MMF.Sample do
   import SumMag.MMF
 
   defmmf do
-    def func_name(list) do
+    def mmfed(list) do
       list
       |> Enum.map(& &1 + 1)
       |> Enum.map(& &1 * 2)
@@ -13,7 +13,7 @@ defmodule SumMag.MMF.Sample do
     def test, do: 0
   end
 
-  def enum(list) do
+  def pure(list) do
     list
     |> Enum.map(& &1 + 1)
     |> Enum.map(& &1 * 2)
